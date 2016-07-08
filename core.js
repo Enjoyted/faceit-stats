@@ -65,14 +65,21 @@
 				console.log('nickname : ', nickname);
 				var nickname_api_url = "https://api.faceit.com/api/nicknames/";
 				console.log('calling ' + nickname_api_url + nickname + ' ...');
-				return $http.get(nickname_api_url + nickname).then(function(response) {
-					if (response.data.success) {
-						console.log('response : ', response);
-						return(response.data.payload.guid);
-					} else {
-						$q.reject('could not find user with this nickname');
-					}
-				});
+				return (new Promise(function(resolve, reject) {
+					console.log('before http');
+					$http.get(nickname_api_url + nickname).then(function(response) {
+						console.log('popoppo', response);
+						if (response.data.result === "ok") {
+							console.log('user guid : ', response.data.payload.guid);
+							resolve(response.data.payload.guid);
+						} else {
+							console.log('here???');
+							reject('could not find user with this nickname');
+						}
+					}, function(error) {
+						reject(error);
+					});
+				}));
 			},
 			getUserMatches: function(user_hash) {
 				var matches_url = "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/";
@@ -97,7 +104,7 @@
 				service.getUserHash(nickname).then(function (user_hash) {
 					return (service.getUserMatches(user_hash));
 				}, function(error) {
-					console.log(error);
+					console.log('error ??', error);
 				}).then(function (matches) {
 					console.log('matches : ', matches);
 				}, function() {
