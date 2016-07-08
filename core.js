@@ -1,8 +1,7 @@
 (function() {
-	/* globals angular */
 	var app = angular.module('app', []);
 
-	app.factory('scrap', [function() {
+	app.factory('scrap', ['$http', '$q', function($http, $q) {
 		var service = {
 			findFaction: function(json) {
 			  var faction = "faction";
@@ -62,46 +61,59 @@
 					return (p);
 				});
 			},
-			getMatches: function(user) {
-				var user = "zoze";
-				console.log(user);
+			getUserHash: function(nickname) {
+				console.log('nickname : ', nickname);
 				var nickname_api_url = "https://api.faceit.com/api/nicknames/";
-				var user_hash = "";
-				var p = new Promise(function (resolve, reject) {
-					$.getJSON(nickname_api_url + user, function(json) {
-						if (json.result === "error") {
-							console.log("doesn't exist");
-							return false;
-						}
-						else {
-							user_hash = json.payload.guid;
-							console.log('1', user_hash);
-						}
-					});
-					console.log('user hash : ', user_hash);
-					resolve(user_hash);
-					return (p);
+				console.log('calling ' + nickname_api_url + nickname + ' ...');
+				return $http.get(nickname_api_url + nickname).then(function(response) {
+					if (response.data.success) {
+						console.log('response : ', response);
+						return(response.data.payload.guid);
+					} else {
+						$q.reject('could not find user with this nickname');
+					}
 				});
-				Promise.all([p]).then(function () {
-					console.log('after first promise');
-					var p = new Promise(function (resolve, reject) {
-						var matches_url = "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/";
-						console.log('2', user_hash);
-						$.getJSON(matches_url + user_hash + "/games/csgo?page=1&size=1000", function(json) {
-							console.log(json);
-						});
-						return (p.resolve());
+			},
+			getUserMatches: function(user_hash) {
+				var matches_url = "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/";
+				var arr = [];
+				var run = function(i) {
+					console.log(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10");
+					return $http.get(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10").then(function(response) {
+						console.log('response : ', response);
+						json = response.data;
+						if (json.length === 0)
+							return (arr);
+						else {
+							arr = arr.concat(json);
+							return (run(i + 1));
+						}
 					});
+				};
+				return (run(1));
+			},
+			fetch: function(nickname) {
+				var user_hash = "";
+				service.getUserHash(nickname).then(function (user_hash) {
+					return (service.getUserMatches(user_hash));
+				}, function(error) {
+					console.log(error);
+				}).then(function (matches) {
+					console.log('matches : ', matches);
+				}, function() {
+					console.log('could not find matches ?');
 				});
 			}
 		}
+		return service;
+	}]);
 
+		/*
 		var arr = [];
 		$(".clickable").each(function () {
 		  arr.push(angular.element($(this)).scope().match.info.matchId);
 		});
 
-		/* this value has to be changed for your Faceit Nickname */
 		var self_user = "Enjoy";
 		var datas = {}, wait = [];
 		for (var i=0;i<arr.length;i++) {
@@ -112,31 +124,22 @@
 		Promise.all(wait).then(function() {
 			//displayData(datas);
 			console.log('??');
-			/*datas.sort(function (a, b) {
-			    if (a.wins > b.wins)
-			      return 1;
-			    if (a.wins < b.wins)
-			      return -1;
-			    // a doit être égale à b
-			    return 0;
-			});*/
 			console.log(datas);
-		});
-	}]);
+		});*/
 
-
-	app.controller('controller', ['$scope', 'scrap', function($scope) {
-		$scope.user = null;
+	app.controller('controller', ['$scope', 'scrap', function($scope, scrap) {
+		$scope.user = {};
 
 
 		$scope.fetch = function(user) {
-			$scope.user = user;
-			var matches = scrap.service.getMatches(user);
+			console.log('user 1 : ', user);
+			var matches = scrap.fetch(user.nickname);
+			console.log('matches : ', matches);
 			var datas = {}, wait = [];
 
-			for (var i = 0, var c = matches.length; i < c; i++) {
+			for (var i = 0; i < matches.length; i++) {
 				console.log(matches[i]);
-				wait.push(service.getData(datas, matches[i]));
+				wait.push(scrap.getData(datas, matches[i]));
 			}
 		};
 		
