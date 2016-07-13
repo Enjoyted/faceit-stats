@@ -1,4 +1,7 @@
 /* globals angular */
+
+/* TODO getData() */
+
 (function() {
 	var app = angular.module("app", []);
 
@@ -49,19 +52,21 @@
 				}
 			  }
 			},
-			getData: function(datas, hash) {
-				console.log("getting stats on match : " + hash);
-				var p = new Promise(function (resolve, reject) {
-					$.getJSON("https://api.faceit.com/api/matches/" + hash + "?withStats=true", function(json) {
-						var json = json.payload;
-						var winner = json.winner;
-						var faction = service.findFaction(json);
+			getData: function(matches) {
+				return (new Promise(function (resolve, reject) {
+					console.log("getting stats on match : " + hash);
+					var p = new Promise(function (resolve, reject) {
+						$.getJSON("https://api.faceit.com/api/matches/" + hash + "?withStats=true", function(json) {
+							var json = json.payload;
+							var winner = json.winner;
+							var faction = service.findFaction(json);
 
-						datas = service.fillData(datas, json, faction, winner);
+							datas = service.fillData(datas, json, faction, winner);
+						});
+						resolve(datas);
+						return (p);
 					});
-					resolve(datas);
-					return (p);
-				});
+				}));
 			},
 			getUserHash: function() {
 				var self = this;
@@ -106,7 +111,11 @@
 				return (new Promise(function(resolve, reject) {
 					service.getUserHash().then(function (user_hash) {
 						service.getUserMatches(user_hash).then(function (matches) {
-							resolve(matches);
+							service.getData(matches).then(function () {
+
+							}, function (error) {
+
+							});
 						}, function (error) {
 							reject("error while getting matches : ", error);
 						});
