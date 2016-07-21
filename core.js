@@ -53,19 +53,26 @@
 			  }
 			},
 			getData: function(matches) {
+				var datas = {};
 				return (new Promise(function (resolve, reject) {
-					console.log("getting stats on match : " + hash);
-					var p = new Promise(function (resolve, reject) {
-						$.getJSON("https://api.faceit.com/api/matches/" + hash + "?withStats=true", function(json) {
-							var json = json.payload;
+					var loopMatches = function(i) {
+						return $http.get("https://api.faceit.com/api/matches/" + matches[i].matchId + "?withStats=true").then(function (response) {
+							console.log("getting stats on match : " + matches[i].matchId);
+							var json = response.data.payload;
 							var winner = json.winner;
 							var faction = service.findFaction(json);
 
 							datas = service.fillData(datas, json, faction, winner);
+							if (i + 1 === matches.length) {
+								resolve(datas);
+							} else {
+								return (loopMatches(i + 1));
+							}
+						}, function (error) {
+							console.log("get Data error ? : ", error);
 						});
-						resolve(datas);
-						return (p);
-					});
+					};
+					return (loopMatches(0));
 				}));
 			},
 			getUserHash: function() {
@@ -89,7 +96,7 @@
 				return (new Promise(function(resolve, reject) {
 					var run = function(i) {
 						console.log(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10");
-						return $http.get(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10").then(function(response) {
+						return $http.get(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10").then(function (response) {
 							console.log("response : ", response);
 							var json = response.data;
 							if (json.length === 0)
@@ -111,10 +118,10 @@
 				return (new Promise(function(resolve, reject) {
 					service.getUserHash().then(function (user_hash) {
 						service.getUserMatches(user_hash).then(function (matches) {
-							service.getData(matches).then(function () {
-
+							service.getData(matches).then(function (datas) {
+								console.log("getData() has finished ? datas : ", datas);
 							}, function (error) {
-
+								reject("error while getting data : ", error);
 							});
 						}, function (error) {
 							reject("error while getting matches : ", error);
