@@ -25,14 +25,13 @@
 				var user = json[faction][y].nickname;
 				if (user !== this.current_user) {
 				  if (user in datas) {
-				  	var totalGames = Number(datas[user].wins + datas[user].losses);
+				  	var totalGames = Number(datas[user].wins) + Number(datas[user].losses);
 					if (winner === faction) {
 					  datas[user].wins++;
-					  datas[user].percentage = Math.floor(datas[user].wins / totalGames * 100);
-					}
-					else {
+					  datas[user].percentage = Math.floor((datas[user].wins / (totalGames + 1)) * 100);
+					} else {
 					  datas[user].losses++;
-					  datas[user].percentage = Math.floor(datas[user].wins / totalGames * 100);
+					  datas[user].percentage = Math.floor((datas[user].wins / (totalGames + 1)) * 100);
 					}
 				  }
 				  else {
@@ -53,8 +52,9 @@
 			  }
 			},
 			getData: function(matches) {
-				var datas = {};
+				var map = {};
 				return (new Promise(function (resolve, reject) {
+					var wait = [];
 					var loopMatches = function(i) {
 						return $http.get("https://api.faceit.com/api/matches/" + matches[i].matchId + "?withStats=true").then(function (response) {
 							console.log("getting stats on match : " + matches[i].matchId);
@@ -62,17 +62,24 @@
 							var winner = json.winner;
 							var faction = service.findFaction(json);
 
-							datas = service.fillData(datas, json, faction, winner);
-							if (i + 1 === matches.length) {
-								resolve(datas);
-							} else {
-								return (loopMatches(i + 1));
-							}
-						}, function (error) {
-							console.log("get Data error ? : ", error);
+							return (service.fillData(map, json, faction, winner));
 						});
 					};
-					return (loopMatches(0));
+					for (var i in matches) {
+						wait.push(loopMatches(i));
+					}
+					return Promise.all(wait).then(function () {
+						var datas = [];
+						for (var i in map) {
+							datas.push({
+								username: i,
+								data: map[i]
+							});
+						}
+						resolve(datas);
+					}, function (error) {
+						reject(error);
+					});
 				}));
 			},
 			getUserHash: function() {
@@ -119,7 +126,7 @@
 					service.getUserHash().then(function (user_hash) {
 						service.getUserMatches(user_hash).then(function (matches) {
 							service.getData(matches).then(function (datas) {
-								console.log("getData() has finished ? datas : ", datas);
+								resolve(datas);
 							}, function (error) {
 								reject("error while getting data : ", error);
 							});
@@ -140,8 +147,8 @@
 
 		$scope.fetch = function(user) {
 			console.log("user 1 : ", user);
-			var matches = scrap.fetch(user.nickname).then(function(matches) {
-				console.log("matches : ", matches);
+			var matches = scrap.fetch(user.nickname).then(function(datas) {
+				console.log("matches : ", datas);
 			}, function(error) {
 				console.log(error);
 			});
