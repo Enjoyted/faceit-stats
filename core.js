@@ -94,11 +94,7 @@
 				/* sort by asc usernames */
 				datas.sort(function (a, b) {
 					var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
-				    if(nameA < nameB)
-						return -1;
-				    if(nameA > nameB)
-						return 1;
-					return 0;
+					return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
 				});
 				return datas;
 			},
