@@ -1,13 +1,22 @@
 /* globals angular */
 
-/* TODO getData() */
+/** TODO
+*	KNOWN BUG :
+*		- Something is wrong in the data retrieving. The data between two users is different for each other, ex :
+*		PlayerA has a 87% win with PlayerB, with a 21-3 win-loss ratio.
+*		But when browsing for PlayerB stats, he has a 88% with a 15-2 win-loss ratio. I don't know yet where this comes from.
+*		It doesn't happen randomly, only  withvery specific users.
+*/
 
 (function() {
 	var app = angular.module("app", []);
 
 	app.factory("scrap", ["$http", "$q", function($http, $q) {
 		var service = {
+			matches_api_url: "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/",
+			nickname_api_url: "https://api.faceit.com/api/nicknames/",
 			current_user: null,
+			min_matches: 5,
 			findFaction: function(json) {
 			  var faction = "faction";
 			  for (var ii = 0; ii < json[faction + "1"].length; ii++) {
@@ -41,17 +50,8 @@
 			  }
 			  return datas;
 			},
-			displayData: function (datas) {
-			  for (var user in datas) {
-				var totalGames = Number(datas[user].wins + datas[user].losses);
-				if (totalGames > 3) {
-				  console.log("You have played " + totalGames + " games with the user : " + user + ". Your percentage rate with him is : " + datas[user].percentage + " %.");
-				} else {
-					console.log("?");
-				}
-			  }
-			},
-			getData: function(matches) {
+			getData: function (matches) {
+				var self = this;
 				var map = {};
 				return (new Promise(function (resolve, reject) {
 					var wait = [];
@@ -76,19 +76,38 @@
 								data: map[i]
 							});
 						}
-						resolve(datas);
+						resolve(self.getRelevantData(datas));
 					}, function (error) {
 						reject(error);
 					});
 				}));
 			},
+			getRelevantData: function (datas) {
+				var self = this;
+				/* remove users where total number of games is lower than `min_matches` parameter */
+				for (var i = 0; i < datas.length; i++) {
+					if (datas[i].data.wins + datas[i].data.losses < self.min_matches) {
+						datas.splice(i, 1);
+						i--;
+					}
+				}
+				/* sort by asc usernames */
+				datas.sort(function (a, b) {
+					var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
+				    if(nameA < nameB)
+						return -1;
+				    if(nameA > nameB)
+						return 1;
+					return 0;
+				});
+				return datas;
+			},
 			getUserHash: function() {
 				var self = this;
 				console.log("nickname : ", self.current_user);
-				var nickname_api_url = "https://api.faceit.com/api/nicknames/";
-				console.log("calling " + nickname_api_url + self.current_user + " ...");
+				console.log("calling " + self.nickname_api_url + self.current_user + " ...");
 				return (new Promise(function(resolve, reject) {
-					$http.get(nickname_api_url + self.current_user).then(function(response) {
+					$http.get(self.nickname_api_url + self.current_user).then(function(response) {
 						console.log("user guid : ", response.data.payload.guid);
 						resolve(response.data.payload.guid);
 					}, function(error) {
@@ -97,13 +116,13 @@
 					});
 				}));
 			},
-			getUserMatches: function(user_hash) {
-				var matches_url = "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/";
+			getUserMatches: function (user_hash) {
+				var self = this;
 				var arr = [];
 				return (new Promise(function(resolve, reject) {
 					var run = function(i) {
-						console.log(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10");
-						return $http.get(matches_url + user_hash + "/games/csgo?page=" + i + "&size=10").then(function (response) {
+						console.log(self.matches_api_url + user_hash + "/games/csgo?page=" + i + "&size=10");
+						return $http.get(self.matches_api_url + user_hash + "/games/csgo?page=" + i + "&size=10").then(function (response) {
 							console.log("response : ", response);
 							var json = response.data;
 							if (json.length === 0)
@@ -133,7 +152,7 @@
 						}, function (error) {
 							reject("error while getting matches : ", error);
 						});
-					}, function(error) {
+					}, function (error) {
 						reject("error while getting user's hash : ", error);
 					});
 				}));
@@ -142,26 +161,16 @@
 		return service;
 	}]);
 
-	app.controller("controller", ["$scope", "scrap", function($scope, scrap) {
+	app.controller("controller", ["$scope", "scrap", function ($scope, scrap) {
 		$scope.user = {};
 
 		$scope.fetch = function(user) {
 			console.log("user 1 : ", user);
-			var matches = scrap.fetch(user.nickname).then(function(datas) {
-				console.log("matches : ", datas);
+			var matches = scrap.fetch(user.nickname).then(function (datas) {
+				console.log("stats : ", datas);
 			}, function(error) {
 				console.log(error);
 			});
-			console.log("-------------");
-			/*
-			var datas = {}, wait = [];
-
-			for (var i = 0; i < matches.length; i++) {
-				console.log(matches[i]);
-				wait.push(scrap.getData(datas, matches[i]));
-			}*/
 		};
-		
 	}]);
-
 })();
