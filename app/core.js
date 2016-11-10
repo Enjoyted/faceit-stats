@@ -16,7 +16,7 @@
 			matches_api_url: "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/",
 			nickname_api_url: "https://api.faceit.com/api/nicknames/",
 			current_user: null,
-			min_matches: 5,
+			min_matches: 1,
 			progress: 0,
 			toto: {},
 			findFaction: function(json) {
@@ -82,7 +82,7 @@
 								data: map[i]
 							});
 						}
-						resolve(self.getRelevantData(datas));
+						resolve(datas);
 					}, function (error) {
 						reject(error);
 					});
@@ -97,11 +97,6 @@
 						i--;
 					}
 				}
-				/* sort by asc usernames */
-				datas.sort(function (a, b) {
-					var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
-					return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-				});
 				return datas;
 			},
 			getUserHash: function() {
@@ -151,10 +146,26 @@
 		return service;
 	}]);
 
+	app.filter('range', function() {
+	    return function (items, property, min, max) {
+	    	return items.filter(function(item){
+	    		var matches = (item[property].wins + item[property].losses);
+		        return matches >= min && matches <= max;  
+		    });
+	    }
+  	});
+
 	app.controller("controller", ["$scope", "$timeout", "$filter", "scrap", function ($scope, $timeout, $filter, scrap) {
 		$scope.service = scrap;
 		$scope.data = [];
 		$scope.user = {};
+		$scope.filter = {
+			username: '',
+			orderBy: 'username',
+			orderMode: '+',
+			minMatches: 2,
+			maxMatches: 100
+		};
 
 		$scope.fetch = function(user) {
 			console.log("user 1 : ", user);
