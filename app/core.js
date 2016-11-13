@@ -14,7 +14,6 @@
 			current_user: null,
 			min_matches: 3,
 			progress: 0,
-			toto: {},
 			findFaction: function(json) {
 			  var faction = "faction";
 			  for (var ii = 0; ii < json[faction + "1"].length; ii++) {
@@ -49,7 +48,6 @@
 			  return datas;
 			},
 			getData: function (matches) {
-				service.toto = matches;
 				var self = this;
 				var map = {};
 				return (new Promise(function (resolve, reject) {
