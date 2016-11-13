@@ -1,11 +1,7 @@
 /* globals angular */
 
 /** TODO
-*	KNOWN BUG :
-*		- Something is wrong in the data retrieving. The data between two users is different for each other, ex :
-*		PlayerA has a 87% win with PlayerB, with a 21-3 win-loss ratio.
-*		But when browsing for PlayerB stats, he has a 88% with a 15-2 win-loss ratio. I don't know yet where this comes from.
-*		It doesn't happen randomly, only  withvery specific users.
+* More data
 */
 
 (function() {
@@ -16,7 +12,7 @@
 			matches_api_url: "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/",
 			nickname_api_url: "https://api.faceit.com/api/nicknames/",
 			current_user: null,
-			min_matches: 1,
+			min_matches: 3,
 			progress: 0,
 			toto: {},
 			findFaction: function(json) {
@@ -88,17 +84,6 @@
 					});
 				}));
 			},
-			getRelevantData: function (datas) {
-				var self = this;
-				/* remove users where total number of games is lower than `min_matches` parameter */
-				for (var i = 0; i < datas.length; i++) {
-					if (datas[i].data.wins + datas[i].data.losses < self.min_matches) {
-						datas.splice(i, 1);
-						i--;
-					}
-				}
-				return datas;
-			},
 			getUserHash: function() {
 				var self = this;
 				console.log("nickname : ", self.current_user);
@@ -147,10 +132,10 @@
 	}]);
 
 	app.filter('range', function() {
-	    return function (items, property, min, max) {
+	    return function (items, property, min) {
 	    	return items.filter(function(item){
 	    		var matches = (item[property].wins + item[property].losses);
-		        return matches >= min && matches <= max;  
+		        return matches >= min;  
 		    });
 	    }
   	});
@@ -163,8 +148,7 @@
 			username: '',
 			orderBy: 'username',
 			orderMode: '+',
-			minMatches: 2,
-			maxMatches: 100
+			minMatches: $scope.service.min_matches,
 		};
 
 		$scope.fetch = function(user) {
