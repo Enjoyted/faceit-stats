@@ -14,7 +14,7 @@
 			current_user: null,
 			min_matches: 3,
 			progress: 0,
-			findFaction: function(json) {
+			_findFaction: function(json) {
 			  var faction = "faction";
 			  for (var ii = 0; ii < json[faction + "1"].length; ii++) {
 				if (json[faction + "1"][ii].nickname == this.current_user) {
@@ -26,7 +26,7 @@
 				faction += "2";
 			  return faction;
 			},
-			fillData: function (datas, json, faction, winner) {
+			_fillData: function (datas, json, faction, winner) {
 			  for (var y=0;y<json[faction].length;y++) {
 				var user = json[faction][y].nickname;
 				if (user !== this.current_user) {
@@ -58,10 +58,10 @@
 							console.log("getting stats on match : " + matches[i].matchId, service.progress);
 							var json = response.data.payload;
 							var winner = json.winner;
-							var faction = service.findFaction(json);
+							var faction = service._findFaction(json);
 							service.progress = (((progress * 40) / matches.length) + 60);
 							progress++;
-							return (service.fillData(map, json, faction, winner));
+							return (service._fillData(map, json, faction, winner));
 						});
 					};
 					for (var i in matches) {
