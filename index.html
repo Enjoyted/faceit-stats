@@ -25,7 +25,6 @@
     </nav>
 
     <div class="container main-container" ng-cloak>
-
       <!-- Button -->
       <div class="container well col-md-12">
         <div class="input-group input-group-lg">
@@ -36,7 +35,6 @@
           </span>
         </div>
       </div>
-
       <!-- List -->
       <div class="container col-md-12">
         <div class="progress" ng-show="service.progress < 100 && service.progress > 0">
@@ -57,32 +55,38 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4" ng-show="service.progress == 100">
-          <div class="input-group">
-            <label id="input-rang-matches" class="input-group-addon">Min Matches</label>
-            <input type="number" for="input-rang-matches" class="form-control" aria-describedby="input-rang-matches" min="1" ng-model="filter.minMatches">
+          <div class="col-md-4" ng-show="service.progress == 100">
+            <div class="input-group">
+              <label id="input-rang-matches" class="input-group-addon">Min Matches</label>
+              <input type="number" for="input-rang-matches" class="form-control" aria-describedby="input-rang-matches" min="1" ng-model="filter.minMatches">
+            </div>
+            <div class="input-group">
+              <label id="input-username" class="input-group-addon">Username</label>
+              <input type="text" for="input-username" class="form-control" aria-describedby="input-username" ng-model="filter.username">
+            </div>
+            <div class="input-group">
+              <label id="input-order" class="input-group-addon">Order</label>
+              <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderBy">
+                <option value="username">Username</option>
+                <option value="data.wins">Wins</option>
+                <option value="data.losses">Losses</option>
+                <option value="data.percentage">Percentage</option>
+              </select>
+              <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderMode">
+                <option value="+">Asc</option>
+                <option value="-">Desc</option>
+              </select>
+            </div>
           </div>
-          <div class="input-group">
-            <label id="input-username" class="input-group-addon">Username</label>
-            <input type="text" for="input-username" class="form-control" aria-describedby="input-username" ng-model="filter.username">
-          </div>
-          <div class="input-group">
-            <label id="input-order" class="input-group-addon">Order</label>
-            <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderBy">
-              <option value="username">Username</option>
-              <option value="data.wins">Wins</option>
-              <option value="data.losses">Losses</option>
-              <option value="data.percentage">Percentage</option>
-            </select>
-            <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderMode">
-              <option value="+">Asc</option>
-              <option value="-">Desc</option>
-            </select>
-          </div>
+        </div>
       </div>
-
-    </div>
-
+      <!-- Footer -->
+      <div id="footer">
+        <p>Made by <a href="https://www.faceit.com/en/players/Enjoy/stats/csgo">Enjoy</a></p>
+        <a class="foot-img" href="https://github.com/Enjoyted">
+          <img src="assets/images/GitHub_Logo.png" />
+        </a>
+      </div>
     <!-- SCRIPT -->
   	<script src="app/core.js"></script>
   </body>

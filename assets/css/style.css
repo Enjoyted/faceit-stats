@@ -6,3 +6,21 @@
 body {
 	
 }
+
+#footer {
+	margin: 0 auto;
+	width: 200px;
+	font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+#footer a {
+	display: inline-block;
+}
+
+#footer .foot-img {
+	text-align: center;
+}
+
+#footer img {
+	text-align: center;
+	width: 70px;
+}
