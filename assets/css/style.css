@@ -7,10 +7,21 @@ body {
 	
 }
 
+.center {
+	text-align: center;
+}
+
 #footer {
+	position: fixed;
+	bottom: 0;
+	border-top: 1px solid black;
 	margin: 0 auto;
-	width: 200px;
+	width: 100%;
 	font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+#footer #inner-footer {
+	margin: 0 auto;
+	width: 10%;
 }
 #footer a {
 	display: inline-block;
@@ -23,4 +34,17 @@ body {
 #footer img {
 	text-align: center;
 	width: 70px;
+}
+
+.nodata {
+	font-size: 20px;
+	font-style: italic;
+}
+
+.percentage-sup {
+	color: #90EE90;
+}
+
+.percentage-inf {
+	color: #FF6666;
 }

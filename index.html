@@ -42,6 +42,9 @@
             <span class="sr-only">{{service.progress}}%</span>
           </div>
         </div>
+        <div class="nodata center" ng-show="service.progress != 100">
+          No data yet.
+        </div>
         <div class="col-md-8" ng-show="service.progress == 100">
           <div class="panel panel-default" ng-repeat="item in data 
             | filter:{username:filter.username} 
@@ -51,7 +54,11 @@
             <div class="panel-body">
               <div>Wins : {{item.data.wins}}</div>
               <div>Losses : {{item.data.losses}}</div>
-              <div>Percentage : {{item.data.percentage}}%</div>
+              <div>Percentage : 
+                <span class="{{ item.data.percentage > 49 ? 'percentage-sup' : 'percentage-inf' }}">
+                  <b>{{item.data.percentage}}%</b>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -82,10 +89,12 @@
       </div>
       <!-- Footer -->
       <div id="footer">
-        <p>Made by <a href="https://www.faceit.com/en/players/Enjoy/stats/csgo">Enjoy</a></p>
-        <a class="foot-img" href="https://github.com/Enjoyted">
-          <img src="assets/images/GitHub_Logo.png" />
-        </a>
+        <div id="inner-footer">
+          <p>Made by <a href="https://www.faceit.com/en/players/Enjoy/stats/csgo">Enjoy</a></p>
+          <a class="foot-img" href="https://github.com/Enjoyted">
+            <img src="assets/images/GitHub_Logo.png" />
+          </a>
+        </div>
       </div>
     <!-- SCRIPT -->
   	<script src="app/core.js"></script>
