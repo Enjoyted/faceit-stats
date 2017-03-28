@@ -9,7 +9,7 @@
 
 	app.factory("scrap", ["$http", "$q", function($http, $q) {
 		var service = {
-			matches_api_url: "https://api-gateway.faceit.com/stats/api/v1/stats/time/users/",
+			matches_api_url: "https://api.faceit.com/stats/api/v1/stats/time/users/",
 			nickname_api_url: "https://api.faceit.com/api/nicknames/",
 			current_user: null,
 			min_matches: 3,
