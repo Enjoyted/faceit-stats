@@ -55,13 +55,15 @@
 					var wait = [];
 					var loopMatches = function(i) {
 						return $http.get("https://api.faceit.com/api/matches/" + matches[i].matchId + "?withStats=true").then(function (response) {
-							console.log("getting stats on match : " + matches[i].matchId, service.progress);
+							console.log("(" + i + ")" + "getting stats on match : " + matches[i].matchId, service.progress);
 							var json = response.data.payload;
 							var winner = json.winner;
 							var faction = service._findFaction(json);
 							service.progress = (((progress * 40) / matches.length) + 60);
 							progress++;
 							return (service._fillData(map, json, faction, winner));
+						}, function(error) {
+							$q.reject(error);
 						});
 					};
 					for (var i in matches) {
@@ -98,13 +100,28 @@
 			},
 			getUserMatches: function (user_hash) {
 				var self = this;
-				console.log(self.matches_api_url + user_hash + "/games/csgo?page=0&size=100000");
-				service.progress = 10;
-				return $http.get(self.matches_api_url + user_hash + "/games/csgo?page=0&size=100000").then(function (response) {
-					console.log("response : ", response);
-					service.progress = 50;
-					return response.data;
-				});
+				var arr = [];
+
+				return (new Promise(function(resolve, reject) {
+					var run = function(i) {
+						console.log(self.matches_api_url + user_hash + "/games/csgo?page=" + i + "&size=100");
+						return $http.get(self.matches_api_url + user_hash + "/games/csgo?page=" + i + "&size=100").then(function(response) {
+							console.log("response : ", response);
+							var json = response.data;
+							if (json.length === 0) {
+								service.progress = 50;
+								resolve(arr);
+							}
+							else {
+								arr = arr.concat(json);
+								return (run(i + 1));
+							}
+						}, function(error) {
+							reject(error);
+						});
+					};
+					return (run(0));
+				}));
 			},
 			fetch: function(nickname) {
 				var user_hash = "";
