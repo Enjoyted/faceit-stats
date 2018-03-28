@@ -47,10 +47,10 @@
         </div>
         <div class="col-md-8" ng-show="service.progress == 100">
           <div class="panel panel-default" ng-repeat="item in data 
-            | filter:{username:filter.username} 
+            | filter:{nickname:filter.nickname} 
             | range:'data':filter.minMatches:filter.maxMatches 
             | orderBy:filter.orderMode+filter.orderBy">
-            <div class="panel-heading">{{item.username}}</div>
+            <div class="panel-heading">{{item.nickname}}</div>
             <div class="panel-body">
               <div>Wins : {{item.data.wins}}</div>
               <div>Losses : {{item.data.losses}}</div>
@@ -68,13 +68,13 @@
               <input type="number" for="input-rang-matches" class="form-control" aria-describedby="input-rang-matches" min="1" ng-model="filter.minMatches">
             </div>
             <div class="input-group">
-              <label id="input-username" class="input-group-addon">Username</label>
-              <input type="text" for="input-username" class="form-control" aria-describedby="input-username" ng-model="filter.username">
+              <label id="input-nickname" class="input-group-addon">Nickname</label>
+              <input type="text" for="input-nickname" class="form-control" aria-describedby="input-nickname" ng-model="filter.nickname">
             </div>
             <div class="input-group">
               <label id="input-order" class="input-group-addon">Order</label>
               <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderBy">
-                <option value="username">Username</option>
+                <option value="nickname">Nickname</option>
                 <option value="data.wins">Wins</option>
                 <option value="data.losses">Losses</option>
                 <option value="data.percentage">Percentage</option>
