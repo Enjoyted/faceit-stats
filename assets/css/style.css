@@ -41,10 +41,19 @@ body {
 	font-style: italic;
 }
 
+.btn-values {
+	padding:6px 0 6px 0;
+	font:Bold 13px Arial;
+	color:#fff;
+	width:50px;
+	border-radius:0px;
+	border:none;
+}
+
 .percentage-sup {
-	color: #90EE90;
+	background-color: #4bbf73;
 }
 
 .percentage-inf {
-	color: #FF6666;
+	background-color: #d9534f;
 }

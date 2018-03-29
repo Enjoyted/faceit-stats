@@ -158,6 +158,7 @@
 		$scope.service = scrap;
 		$scope.data = [];
 		$scope.user = {};
+		$scope.error = 0;
 		$scope.filter = {
 			username: '',
 			orderBy: 'nickname',
@@ -176,7 +177,9 @@
 			    }, 150);
 				console.log("stats : ", datas);
 			}, function(error) {
-				console.log(error);
+				$scope.$apply(function() {
+					$scope.error = "Error. Please try again."
+				});
 			});
 		};
 	}]);

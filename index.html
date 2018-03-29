@@ -6,11 +6,11 @@
     <!-- META -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CSS -->
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- JS -->
-    <script src="assets/angular/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
   </head>
   <body ng-controller="controller">
     
@@ -28,12 +28,13 @@
       <!-- Button -->
       <div class="container well col-md-12">
         <div class="input-group input-group-lg">
-          <label id="big-input" class="input-group-addon">Nickname</label>
-          <input type="text" for="big-input" class="form-control" placeholder="shox" aria-describedby="big-input" ng-model="user.nickname">
+          <label for="big-input" class="input-group-addon">Nickname</label>
+          <input type="text" for="big-input" id="big-input" class="form-control" placeholder="shox" aria-describedby="helpBlock" ng-model="user.nickname" required>
           <span class="input-group-btn">
             <button class="btn btn-default" type="button" ng-click="fetch(user)">Fetch Stats !</button>
           </span>
         </div>
+        <span id="helpBlock" class="center help-block"><i>Make sure to respect the case, "<b>SmithZz</b>" is different from "<b>Smithzz</b>"</i></span>
       </div>
       <!-- List -->
       <div class="container col-md-12">
@@ -42,7 +43,7 @@
             <span class="sr-only">{{service.progress}}%</span>
           </div>
         </div>
-        <div class="nodata center" ng-show="service.progress != 100">
+        <div class="nodata center" ng-show="service.progress != 100" ng-bindhtml="service.error != 0">
           No data yet.
         </div>
         <div class="col-md-8" ng-show="service.progress == 100">
@@ -55,9 +56,9 @@
               <div>Wins : {{item.data.wins}}</div>
               <div>Losses : {{item.data.losses}}</div>
               <div>Percentage : 
-                <span class="{{ item.data.percentage > 49 ? 'percentage-sup' : 'percentage-inf' }}">
+                <button class="btn-values {{ item.data.percentage > 49 ? 'percentage-sup' : 'percentage-inf' }}">
                   <b>{{item.data.percentage}}%</b>
-                </span>
+                </button>
               </div>
             </div>
           </div>
@@ -77,7 +78,7 @@
                 <option value="nickname">Nickname</option>
                 <option value="data.wins">Wins</option>
                 <option value="data.losses">Losses</option>
-                <option value="data.percentage">Percentage</option>
+                <option value="data.percentage">Winning %</option>
               </select>
               <select type="text" for="input-order" class="form-control" aria-describedby="input-order" ng-model="filter.orderMode">
                 <option value="+">Asc</option>
