@@ -43,8 +43,10 @@
             <span class="sr-only">{{service.progress}}%</span>
           </div>
         </div>
-        <div class="nodata center" ng-show="service.progress != 100" ng-bindhtml="service.error != 0">
+        <div ng-if="!service.error" class="nodata center" ng-show="service.progress != 100">
           No data yet.
+        </div>
+        <div ng-if="service.error" class="nodata center" ng-bind-html="service.error">
         </div>
         <div class="col-md-8" ng-show="service.progress == 100">
           <div class="panel panel-default" ng-repeat="item in data 
