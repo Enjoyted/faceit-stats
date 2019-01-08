@@ -10,27 +10,41 @@
 	app.factory("scrap", ["$http", "$q", function($http, $q) {
 		var service = {
 			matches_api_url: "https://api.faceit.com/stats/api/v1/stats/time/users/",
-			nickname_api_url: "https://api.faceit.com/api/nicknames/",
+			old_match_api_url:  "https://api.faceit.com/core/v1/matches/",
+			match_api_url: "https://api.faceit.com/match/v2/match/",
+			nickname_api_url: "https://api.faceit.com/core/v1/nicknames/",
 			current_user: null,
 			min_matches: 5,
 			progress: 0,
-			_findFaction: function(json) {
+			_findFaction: function(json, old) {
 				var faction = "faction";
-				for (var ii = 0; ii < json[faction + "1"].length; ii++) {
-					if (json[faction + "1"][ii].nickname == this.current_user) {
-						faction += "1";
-						break;
+				if (old) {
+					for (var ii = 0; ii < json[faction + "1"].length; ii++) {
+						if (json[faction + "1"][ii].nickname == this.current_user) {
+							faction += "1";
+							break;
+						}
 					}
+					if (faction.substr(-1, faction.length) === "n")
+						faction += "2";
+				} else {
+					for (var ii = 0; ii < json[faction + "1"].roster.length; ii++) {
+						if (json[faction + "1"].roster[ii].nickname == this.current_user) {
+							faction += "1";
+							break;
+						}
+					}
+					if (faction.substr(-1, faction.length) === "n")
+						faction += "2";
 				}
-				if (faction.substr(-1, faction.length) === "n")
-					faction += "2";
 				return faction;
 			},
-			_fillData: function (datas, json, faction, winner) {
+			_fillData: function (datas, json, faction, winner, old) {
 				var self = this;
-				for (var y=0;y<json[faction].length;y++) {
-					var nickname = json[faction][y].nickname;
-					var guid = json[faction][y].guid;
+				var teams = (old) ? json[faction] : json[faction].roster ;
+				for (var y=0;y<teams.length;y++) {
+					var nickname = teams[y].nickname;
+					var guid = old ? teams[y].guid : teams[y].id;
 					if (guid !== self.guid) {
 						if (guid in datas) {
 							var totalGames = Number(datas[guid].wins) + Number(datas[guid].losses);
@@ -53,17 +67,36 @@
 					var progress = 0;
 					var wait = [];
 					var loopMatches = function(i) {
-						return $http.get("https://api.faceit.com/api/matches/" + matches[i].matchId + "?withStats=true").then(function (response) {
-							console.log("(" + i + ")" + "getting stats on match : " + matches[i].matchId, service.progress);
-							var json = response.data.payload;
-							var winner = json.winner;
-							var faction = service._findFaction(json);
-							service.progress = (((progress * 40) / matches.length) + 60);
-							progress++;
-							return (service._fillData(map, json, faction, winner));
-						}, function(error) {
-							$q.reject(error);
-						});
+
+
+						var old = (matches[i].matchId.substr(0,2) == "1-") ? false : true;
+						var correct_match_api = old ? self.old_match_api_url : self.match_api_url;  
+
+						if(old) {
+							return $http.get(correct_match_api + matches[i].matchId + "?withStats=true").then(function (response) {
+								console.log("(" + i + ")" + "getting stats on OLD match : " + matches[i].matchId, service.progress);
+								var json = response.data.payload;
+								var winner = json.winner;
+								var faction = service._findFaction(json, old);
+								service.progress = (((progress * 40) / matches.length) + 60);
+								progress++;
+								return (service._fillData(map, json, faction, winner, old));
+							}, function(error) {
+								$q.reject(error);
+							});
+						} else {
+							return $http.get(correct_match_api + matches[i].matchId).then(function (response) {
+								console.log("(" + i + ")" + "getting stats on match : " + matches[i].matchId, service.progress);
+								var json = response.data.payload;
+								var winner = json.results[0].winner;
+								var faction = service._findFaction(json.teams, old);
+								service.progress = (((progress * 40) / matches.length) + 60);
+								progress++;
+								return (service._fillData(map, json.teams, faction, winner, old));
+							}, function(error) {
+								$q.reject(error);
+							});
+						}
 					};
 					for (var i in matches) {
 						wait.push(loopMatches(i));
