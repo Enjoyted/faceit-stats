@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js"></script>
   </head>
   <body ng-controller="controller">
     
@@ -43,10 +44,10 @@
             <span class="sr-only">{{service.progress}}%</span>
           </div>
         </div>
-        <div ng-if="!service.error" class="nodata center" ng-show="service.progress != 100">
+        <div ng-if="!service.errormsg" class="nodata center" ng-show="service.progress != 100">
           No data yet.
         </div>
-        <div ng-if="service.error" class="nodata center" ng-bind-html="service.error">
+        <div ng-if="service.errormsg" class="errormsg center" ng-bind-html="service.errormsg">
         </div>
         <div class="col-md-8" ng-show="service.progress == 100">
           <div class="panel panel-default" ng-repeat="item in data 

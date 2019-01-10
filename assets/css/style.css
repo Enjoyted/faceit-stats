@@ -27,6 +27,12 @@ body {
 	color: #fff;
 }
 
+.errormsg {
+	font-size: 20px;
+	color:red;
+	font-style: bold;
+}
+
 .btn-values {
 	padding:6px 0 6px 0;
 	font:Bold 13px Arial;
