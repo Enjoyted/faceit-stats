@@ -39,7 +39,7 @@
 				}
 				return faction;
 			},
-			_purgeNonElligibleGames:  function(old, json) {
+			_isElligibleGame:  function(old, json) {
 				/* Basically ignore non 5v5 games, non elo games */
 				var elligibleGame = false;
 				if (old) {
@@ -128,7 +128,7 @@
 							return $http.get(correct_match_api + matches[i].matchId + "?withStats=true").then(function (response) {
 								console.log("(" + i + ")" + "getting stats on OLD match : " + matches[i].matchId, service.progress);
 								var json = response.data.payload;
-								if (service._purgeNonElligibleGames(old, json)) {
+								if (service._isElligibleGame(old, json)) {
 									var winner = json.winner;
 									var faction = service._findFaction(json, old);
 									service.progress = (((progress * 40) / matches.length) + 60);
@@ -142,7 +142,7 @@
 							return $http.get(correct_match_api + matches[i].matchId).then(function (response) {
 								console.log("(" + i + ")" + "getting stats on match : " + matches[i].matchId, service.progress);
 								var json = response.data.payload;
-								if (service._purgeNonElligibleGames(old, json)) {
+								if (service._isElligibleGame(old, json)) {
 									var winner = json.results[0].winner;
 									var faction = service._findFaction(json.teams, old);
 									service.progress = (((progress * 40) / matches.length) + 60);
